@@ -1,0 +1,28 @@
+name: "CI"
+
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: zsj439453290/gitlab-ci-nodejs:linux-amd64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          # 在这里添加构建和测试你的应用的命令
+          yarn
+          npm run build
+      - name: Cov Test
+        run: |
+          # 在这里添加构建和测试你的应用的命令
+          echo "secrets: ${{ toJson(secrets) }}"
+          npm run test:cov
