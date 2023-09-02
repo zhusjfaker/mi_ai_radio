@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "LOGINFO=true ts-node-dev ./src/index.ts",
+    "unit": "jest ./test/mi.spec.ts",
     "serve": "node ./lib/index.js",
     "test:cov": "jest --ci --coverage",
     "typecheck": "tsc --noEmit",
