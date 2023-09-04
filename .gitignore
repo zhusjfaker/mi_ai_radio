@@ -133,6 +133,7 @@ dist
 # dist
 lib
 types
+token
 
 # mac
 .DS_Store

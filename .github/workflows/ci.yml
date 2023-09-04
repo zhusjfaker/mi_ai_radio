@@ -2,6 +2,8 @@ name: "CI"
 
 env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  MI_USER: ${{ secrets.MI_USER }}
+  MI_PASS: ${{ secrets.MI_PASS }}
 
 on:
   workflow_dispatch:

@@ -4,13 +4,13 @@ import { Context } from 'koa';
 
 export async function ApiController(ctx: Context) {
   const req = ctx.request as any;
-  const msg = req.body.payload;
+  const msg = req.body.content;
   const id = req.body.id != '' ? req.body.id : undefined;
   try {
-    const reponse = await request_gpt(msg, id);
+    // const reponse = await request_gpt(msg, id);
     ctx.body = {
-      id: reponse.id,
-      msg: reponse.msg,
+      // id: reponse.id,
+      msg,
     };
   } catch (error) {
     ctx.body = {

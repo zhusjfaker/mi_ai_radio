@@ -1,21 +1,32 @@
 import fetch from 'node-fetch';
+import { getRandom, serviceLogin } from '../src/lib';
 
 describe('MI OPEN API', () => {
   test.skip('test convers api', async () => {
-    const timestamp = Math.floor(Date.now());
-    const hardware = 'lx06';
     const device_id = '545137194';
     const user_id = '328902396';
-    const service_token =
-      'V1:DXmurwq2/R1BHTELu6obCXeYvoHxsM6jwn3usHz3A3F0PGVNOOKzhbT9ho8iMnWp71uktKIiFQLycjlR0vDmBa9gD2uH9/+PF7pPB0YWH/cmsBwUqJVC7dnlTuVqVNH0I3R0bvh8hcHb3u/eLGk6Z+wIN+PFn3HzfKzXNHgnC7WLIimx3chvtltxjcaaU9/agrlYk/AYSGFWUFdp8gflLLu5lUY1uVMWZtsMkLH/1mzotofX7RUR8SKIfbAJV8O/h70qOg8UPjiiaGWOrGePHvIHiNE8nncw/qGB4tFP0DQ=';
-
-    const url = `https://userprofile.mina.mi.com/device_profile/v2/conversation?source=dialogu&hardware=${hardware}&timestamp=${timestamp}&limit=2`;
-    // COOKIE_TEMPLATE = "deviceId={device_id}; serviceToken={service_token}; userId={user_id}"
+    const method = 'player_play_operation';
+    const service_path = 'mediaplayer';
+    const payload = {
+      deviceId: device_id,
+      message: JSON.stringify({
+        action: 'play',
+        media: 'app_ios',
+      }),
+      method,
+      path: service_path,
+      requestId: `app_ios_${getRandom(30)}`,
+    };
+    const sid = 'micoapi';
+    const reLogin = true;
+    const url = 'https://api2.mina.mi.com/remote/ubus';
 
     const resp = (await fetch(url, {
       method: 'GET',
       headers: {
-        Cookie: `deviceId=${device_id}; serviceToken=${service_token}; userId=${user_id}`,
+        'User-Agent':
+          'MiHome/6.0.103 (com.xiaomi.mihome; build:6.0.103.1; iOS 14.4.0) Alamofire/6.0.103 MICO/iOSApp/appStore/6.0.103',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     }).catch((err) => {
       console.log(`Error: ${err.message} \n Stack: ${err.stack}`);
@@ -24,5 +35,16 @@ describe('MI OPEN API', () => {
       const json = await resp.json();
       console.log(json);
     }
+  });
+
+  test('get getRandom length', () => {
+    const res = getRandom(16);
+    expect(res.length).toBe(16);
+  });
+
+  test('test login api', async () => {
+    const mi_login_json_result = await serviceLogin();
+    expect(mi_login_json_result !== undefined).toBe(true);
+    expect(mi_login_json_result.passToken !== undefined).toBe(true);
   });
 });
