@@ -73,6 +73,7 @@ async function serviceLogin() {
     };
     //'E02B6C1A0FE30FCA866559E5729E824C'
     //'https://sts.api.io.mi.com/sts'
+    console.log(`payload: \n ${JSON.stringify(payload, null, 2)}`);
     const url = 'https://account.xiaomi.com/pass/serviceLoginAuth2';
     headers['Content-Type'] = 'application/x-www-form-urlencoded';
     const resp = (await fetch(url, {
