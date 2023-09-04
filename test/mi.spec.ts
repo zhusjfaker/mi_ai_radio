@@ -45,6 +45,7 @@ describe('MI OPEN API', () => {
   test('test login api', async () => {
     const mi_login_json_result = await serviceLogin();
     expect(mi_login_json_result !== undefined).toBe(true);
+    console.log(mi_login_json_result);
     expect(mi_login_json_result.passToken !== undefined).toBe(true);
   });
 });

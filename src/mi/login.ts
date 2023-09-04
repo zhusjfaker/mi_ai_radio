@@ -34,7 +34,9 @@ function md5Hash(input) {
 async function serviceLogin() {
   let mi_login_json_result = undefined;
   const user_id = process.env['MI_USER'];
+  if (!user_id) throw new Error('MI_USER is not defined');
   const password = process.env['MI_PASS'];
+  if (!password) throw new Error('MI_PASS is not defined');
   const headers = {
     'User-Agent':
       'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
