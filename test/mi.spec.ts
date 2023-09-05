@@ -43,9 +43,9 @@ describe('MI OPEN API', () => {
   });
 
   test('test login api', async () => {
-    const mi_login_json_result = await serviceLogin();
-    expect(mi_login_json_result !== undefined).toBe(true);
-    expect(mi_login_json_result.description === '成功').toBe(true);
-    console.log(mi_login_json_result);
+    const token = await serviceLogin();
+    expect(token !== undefined).toBe(true);
+    expect(token.description === '成功').toBe(true);
+    console.log(token);
   }, 60000);
 });

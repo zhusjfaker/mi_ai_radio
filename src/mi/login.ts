@@ -1,29 +1,24 @@
 import fetch from 'node-fetch';
-import crypto from 'node:crypto';
-import querystring from 'querystring';
+import fs from 'node:fs';
+import path from 'node:path';
+import { IMiToken } from '../type/itoken';
+import { getRandom } from '../util/random';
+import { md5Hash } from '../util/md5Hash';
+import { createRequestBodySync } from '../util/body';
 
-function createRequestBodySync(data) {
-  const encodedData = querystring.stringify(data);
-  return Buffer.from(encodedData);
-}
-
-function getRandom(length) {
-  const characters =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let randomString = '';
-
-  for (let i = 0; i < length; i++) {
-    const randomIndex = crypto.randomInt(0, characters.length);
-    randomString += characters.charAt(randomIndex);
+function getdiskToken(): IMiToken | undefined {
+  const diskpath = path.join(__dirname, '../../token/mi_token.json');
+  if (fs.existsSync(diskpath)) {
+    const json = JSON.parse(fs.readFileSync(diskpath, 'utf-8'));
+    return json;
   }
-
-  return randomString;
+  return undefined;
 }
 
-function md5Hash(input) {
-  const hash = crypto.createHash('md5');
-  hash.update(input);
-  return hash.digest('hex').toUpperCase();
+function savediskToken(token: IMiToken): IMiToken {
+  const diskpath = path.join(__dirname, '../../token/mi_token.json');
+  fs.writeFileSync(diskpath, JSON.stringify(token, null, 2));
+  return token;
 }
 
 /**
@@ -31,7 +26,9 @@ function md5Hash(input) {
  * 两步验证方法
  * @returns
  */
-async function serviceLogin() {
+async function serviceLogin(): Promise<IMiToken> {
+  const token = getdiskToken();
+  if (token) return token;
   let mi_login_json_result = undefined;
   const user_id = process.env['MI_USER'];
   if (!user_id) throw new Error('MI_USER is not defined');
@@ -73,7 +70,7 @@ async function serviceLogin() {
     };
     //'E02B6C1A0FE30FCA866559E5729E824C'
     //'https://sts.api.io.mi.com/sts'
-    console.log(`payload: \n ${JSON.stringify(payload, null, 2)}`);
+    // console.log(`payload: \n ${JSON.stringify(payload, null, 2)}`);
     const url = 'https://account.xiaomi.com/pass/serviceLoginAuth2';
     headers['Content-Type'] = 'application/x-www-form-urlencoded';
     const resp = (await fetch(url, {
@@ -90,10 +87,14 @@ async function serviceLogin() {
         res.replace('&&&START&&&', '').replace('&&&END&&&', '')
       );
       mi_login_json_result = json;
+      savediskToken(json);
     }
   }
-
   return mi_login_json_result;
 }
 
-export { createRequestBodySync, getRandom, md5Hash, serviceLogin };
+export {
+  serviceLogin,
+  getdiskToken,
+  savediskToken,
+};

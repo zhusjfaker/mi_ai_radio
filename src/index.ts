@@ -4,7 +4,7 @@ import bodyParser from '@koa/bodyparser';
 import { ApiController, MainController } from './controller';
 import { execSync } from 'node:child_process';
 
-execSync('rm -rf ./token/*.txt', {
+execSync('rm -rf ./token/*.json', {
   stdio: 'inherit',
   shell: '/bin/bash',
   cwd: process.cwd(),
