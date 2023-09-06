@@ -80,11 +80,14 @@ export class MiAccount {
       cookie.set('passToken', login_info);
       cookie.set('userId', this.getToken('userId'));
     }
-    const cookieStr = Array.from(cookie.entries())
-      .map(([k, v]) => {
-        `${k}=${v}`;
-      })
-      .join(';');
+    const cookieStr = (() => {
+      const list = Array.from(cookie.entries());
+      let str = '';
+      list.forEach(([k, v]) => {
+        str += `${k}=${v};`;
+      });
+      return str;
+    })();
 
     const headers = {
       'User-Agent':
@@ -122,7 +125,7 @@ export class MiAccount {
     location: string,
     nonce: number,
     ssecurity: string
-  ): Promise<string> {
+  ): Promise<string | undefined> {
     const nsec = 'nonce=' + String(nonce) + '&' + ssecurity;
     const sha1Hash = crypto.createHash('sha1').update(nsec, 'utf8').digest();
     const clientSign = sha1Hash.toString('base64');
@@ -134,18 +137,22 @@ export class MiAccount {
         } \n Stack: \n ${err.stack}`
       );
     })) as unknown as Response | undefined;
-    const respCookies = resp!.headers.get('set-cookie').split(';');
-    const response_cookie_map = new Map<string, string>();
-    respCookies.forEach((cookie) => {
-      const [key, value] = cookie.split('=');
-      response_cookie_map.set(key, value);
-    });
-    const serviceToken = response_cookie_map.get('serviceToken');
-    if (!serviceToken) {
-      const responseText = await resp?.text();
-      throw new Error(`serviceToken is undefined \n ${responseText}`);
+    if (resp!.headers.get('set-cookie')) {
+      const respCookies = resp!.headers.get('set-cookie').split(';');
+      const response_cookie_map = new Map<string, string>();
+      respCookies.forEach((cookie) => {
+        const [key, value] = cookie.split('=');
+        response_cookie_map.set(key, value);
+      });
+      const serviceToken = response_cookie_map.get('serviceToken');
+      if (!serviceToken) {
+        const responseText = await resp?.text();
+        throw new Error(`serviceToken is undefined \n ${responseText}`);
+      }
+      return serviceToken;
+    } else {
+      return undefined;
     }
-    return serviceToken;
   }
 
   public async mi_request(
@@ -179,11 +186,14 @@ export class MiAccount {
 
     const method = data ? 'POST' : 'GET';
 
-    const cookieStr = Array.from(cookie.entries())
-      .map(([k, v]) => {
-        `${k}=${v}`;
-      })
-      .join(';');
+    const cookieStr = (() => {
+      const list = Array.from(cookie.entries());
+      let str = '';
+      list.forEach(([k, v]) => {
+        str += `${k}=${v};`;
+      });
+      return str;
+    })();
 
     if (headers['Content-Type']) {
       headers['Content-Type'] = 'application/x-www-form-urlencoded';
