@@ -4,7 +4,6 @@ import { getRandom } from '../util/random';
 import fetch from 'node-fetch';
 import axios from 'axios';
 import crypto from 'node:crypto';
-import { PassThrough } from 'node:stream';
 
 export class MiAccount {
   public username: string;
@@ -134,11 +133,12 @@ export class MiAccount {
   ): Promise<string> {
     const nsec = `nonce=${nonce}&${ssecurity}`;
     const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
-    const url = `${location}&clientSign=${encodeURI(clientSign)}`;
+    let url = `${location}&clientSign=${encodeURI(clientSign)}`;
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
           'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
     const serviceToken = response.headers['set-cookie'][0].split('=')[1];
