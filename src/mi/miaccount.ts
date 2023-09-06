@@ -2,7 +2,9 @@ import { createRequestBodySync } from '../util/body';
 import { md5Hash } from '../util/md5Hash';
 import { getRandom } from '../util/random';
 import fetch from 'node-fetch';
+import axios from 'axios';
 import crypto from 'node:crypto';
+import { PassThrough } from 'node:stream';
 
 export class MiAccount {
   public username: string;
@@ -20,6 +22,21 @@ export class MiAccount {
     }
     this.password = process.env['MI_PASS'];
     this.token = new Map();
+  }
+
+  public async readStreamToString(
+    stream: ReadableStream<Uint8Array>
+  ): Promise<string> {
+    let s: any = stream;
+    return new Promise((resolve, reject) => {
+      let data = '';
+      s.on('data', (chunk) => {
+        data += chunk.toString();
+      });
+      s.on('end', () => {
+        resolve(data);
+      });
+    });
   }
 
   public setToken(key: string, value: any): void {
@@ -70,15 +87,18 @@ export class MiAccount {
     }
   }
 
-  public async serviceLogin(uri: string, data?: any): Promise<any> {
+  public async serviceLogin(uri: string, data = null) {
+    const headers = {
+      'User-Agent':
+        'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
     const cookie = new Map<string, string>();
     cookie.set('sdkVersion', '3.9');
-    cookie.set('deviceId', this.getToken('deviceId'));
-
-    const login_info = this.getToken('passToken');
-    if (login_info) {
-      cookie.set('passToken', login_info);
-      cookie.set('userId', this.getToken('userId'));
+    cookie.set('deviceId', this.token.get('deviceId'));
+    if ('passToken' in this.token) {
+      cookie.set('userId', this.token.get('userId'));
+      cookie.set('passToken', this.token.get('passToken'));
     }
     const cookieStr = (() => {
       const list = Array.from(cookie.entries());
@@ -88,71 +108,44 @@ export class MiAccount {
       });
       return str;
     })();
-
-    const headers = {
-      'User-Agent':
-        'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Cookie: cookieStr,
-    };
-
-    const url = 'https://account.xiaomi.com/pass/' + uri;
-
-    const resp = (await this.fetch(url, {
-      method: data ? 'POST' : 'GET',
+    headers['Cookie'] = cookieStr;
+    const url = `https://account.xiaomi.com/pass/${uri}`;
+    const method = data === null ? 'GET' : 'POST';
+    const response = await axios({
+      method,
+      url,
+      data: data ? createRequestBodySync(data) : null,
       headers,
-      body: data ? createRequestBodySync(data) : null,
+      httpAgent: false,
     }).catch((err) => {
       throw new Error(
         `uri: \n ${uri} \n data: \n ${data} \n Error: \n ${err.message} \n Stack: \n ${err.stack}`
       );
-    })) as unknown as Response | undefined;
-
-    if (resp && resp.status == 200) {
-      const res = await resp.text();
-      const json = JSON.parse(
-        res.replace('&&&START&&&', '').replace('&&&END&&&', '')
-      );
-      return json;
-    } else {
-      throw new Error(
-        `uri ${uri} request status is not 200 is ${resp?.status}`
-      );
-    }
+    });
+    const raw = response.data.slice(11);
+    const resp = JSON.parse(raw);
+    return resp;
   }
 
   public async securityTokenService(
     location: string,
-    nonce: number,
+    nonce: string,
     ssecurity: string
-  ): Promise<string | undefined> {
-    const nsec = 'nonce=' + String(nonce) + '&' + ssecurity;
-    const sha1Hash = crypto.createHash('sha1').update(nsec, 'utf8').digest();
-    const clientSign = sha1Hash.toString('base64');
-    const url = `${location}&clientSign=${encodeURIComponent(clientSign)}`;
-    const resp = (await this.fetch(url, { method: 'GET' }).catch((err) => {
-      throw new Error(
-        `url: \n ${url} \n function: \n ${'securityTokenService'} \n Error: \n ${
-          err.message
-        } \n Stack: \n ${err.stack}`
-      );
-    })) as unknown as Response | undefined;
-    if (resp!.headers.get('set-cookie')) {
-      const respCookies = resp!.headers.get('set-cookie').split(';');
-      const response_cookie_map = new Map<string, string>();
-      respCookies.forEach((cookie) => {
-        const [key, value] = cookie.split('=');
-        response_cookie_map.set(key, value);
-      });
-      const serviceToken = response_cookie_map.get('serviceToken');
-      if (!serviceToken) {
-        const responseText = await resp?.text();
-        throw new Error(`serviceToken is undefined \n ${responseText}`);
-      }
-      return serviceToken;
-    } else {
-      return undefined;
+  ): Promise<string> {
+    const nsec = `nonce=${nonce}&${ssecurity}`;
+    const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
+    const url = `${location}&clientSign=${encodeURI(clientSign)}`;
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent':
+          'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
+      },
+    });
+    const serviceToken = response.headers['set-cookie'][0].split('=')[1];
+    if (!serviceToken) {
+      throw new Error(`serviceToken is undefined \n ${response.data}`);
     }
+    return serviceToken;
   }
 
   public async mi_request(
