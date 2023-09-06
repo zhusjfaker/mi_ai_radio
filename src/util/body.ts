@@ -1,6 +1,6 @@
-import querystring from 'querystring';
+import url from 'node:url';
 
 export function createRequestBodySync(data) {
-  const encodedData = querystring.stringify(data);
-  return Buffer.from(encodedData);
+  const encodedData = new url.URLSearchParams(data);
+  return encodedData.toString();
 }
