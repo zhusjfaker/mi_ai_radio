@@ -3,7 +3,7 @@ import { md5Hash } from '../util/md5Hash';
 import { getRandom } from '../util/random';
 import fetch from 'node-fetch';
 import axios from 'axios';
-import crypto from 'node:crypto';
+// import crypto from 'node:crypto';
 
 export class MiAccount {
   public username: string;
@@ -115,7 +115,7 @@ export class MiAccount {
       url,
       data: data ? createRequestBodySync(data) : null,
       headers,
-      httpAgent: false,
+      httpsAgent: false,
     }).catch((err) => {
       throw new Error(
         `uri: \n ${uri} \n data: \n ${data} \n Error: \n ${err.message} \n Stack: \n ${err.stack}`
@@ -131,9 +131,10 @@ export class MiAccount {
     nonce: string,
     ssecurity: string
   ): Promise<string> {
-    const nsec = `nonce=${nonce}&${ssecurity}`;
-    const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
-    let url = `${location}&clientSign=${encodeURI(clientSign)}`;
+    // const nsec = `nonce=${nonce}&${ssecurity}`;
+    // const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
+    // let url = `${location}&clientSign=${encodeURI(clientSign)}`;
+    let url = `${location}`;
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
@@ -141,7 +142,19 @@ export class MiAccount {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
-    const serviceToken = response.headers['set-cookie'][0].split('=')[1];
+    const serviceToken = (() => {
+      if (response.headers['set-cookie']?.length > 0) {
+        const cookies = response.headers['set-cookie'];
+        const item = cookies.find((x) => {
+          return x.includes('serviceToken=') === true;
+        });
+        if (item) {
+          const serviceToken = item.split(';')[0].split('=')[1];
+          return serviceToken;
+        }
+      }
+      return undefined;
+    })();
     if (!serviceToken) {
       throw new Error(`serviceToken is undefined \n ${response.data}`);
     }
