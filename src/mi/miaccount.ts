@@ -3,7 +3,6 @@ import { md5Hash } from '../util/md5Hash';
 import { getRandom } from '../util/random';
 import fetch from 'node-fetch';
 import axios from 'axios';
-// import crypto from 'node:crypto';
 
 export class MiAccount {
   public username: string;
@@ -131,10 +130,11 @@ export class MiAccount {
     nonce: string,
     ssecurity: string
   ): Promise<string> {
-    // const nsec = `nonce=${nonce}&${ssecurity}`;
-    // const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
-    // let url = `${location}&clientSign=${encodeURI(clientSign)}`;
-    let url = `${location}`;
+    const crypto = require('crypto');
+    const nsec = `nonce=${nonce}&${ssecurity}`;
+    const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
+    let url = `${location}&clientSign=${encodeURI(clientSign)}`;
+    // let url = `${location}`;
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
