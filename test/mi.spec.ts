@@ -3,7 +3,7 @@ import { MiNAService } from '../src/mi/minaservice';
 import { getRandom } from '../src/util/random';
 
 describe('MI OPEN API', () => {
-  test.skip('get getRandom length', () => {
+  test('get getRandom length', () => {
     const res = getRandom(16);
     expect(res.length).toBe(16);
   });
@@ -13,6 +13,7 @@ describe('MI OPEN API', () => {
     await account.login('xiaomiio');
     expect(account.token !== undefined).toBe(true);
     expect(account.token.get('xiaomiio') !== undefined).toBe(true);
+    console.log(account.token.get('xiaomiio'));
   }, 60000);
 
   test('test get device list', async () => {

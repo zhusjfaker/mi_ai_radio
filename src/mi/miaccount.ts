@@ -1,6 +1,7 @@
 import { createRequestBodySync } from '../util/body';
-import { md5Hash } from '../util/md5Hash';
+import { ConverclientSign, md5Hash } from '../util/md5Hash';
 import { getRandom } from '../util/random';
+import querystring from 'querystring';
 import fetch from 'node-fetch';
 import axios from 'axios';
 
@@ -72,6 +73,7 @@ export class MiAccount {
         this.setToken('passToken', result.passToken);
 
         const serviceToken = await this.securityTokenService(
+          sid,
           result.location,
           result.nonce,
           result.ssecurity
@@ -126,19 +128,24 @@ export class MiAccount {
   }
 
   public async securityTokenService(
+    sid: string,
     location: string,
     nonce: string,
     ssecurity: string
   ): Promise<string> {
-    const crypto = require('crypto');
     const nsec = `nonce=${nonce}&${ssecurity}`;
-    const clientSign = crypto.createHash('sha1').update(nsec).digest('base64');
-    let url = `${location}&clientSign=${encodeURI(clientSign)}`;
-    // let url = `${location}`;
+    const clientSign = ConverclientSign(nsec).toString('utf-8');
+    let url =
+      sid !== 'xiaomiio'
+        ? `${location}&clientSign=${querystring.escape(clientSign)}`
+        : location;
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
-          'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
+          // 'APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS',
+          'MISoundBox/1.4.0,iosPassportSDK/iOS-3.2.7 iOS/11.2.5',
+        'Accept-Language': 'zh-cn',
+        Connection: 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
