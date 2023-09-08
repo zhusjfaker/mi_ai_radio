@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import base64 from 'base64-js';
 
 export function md5Hash(input) {
   const hash = crypto.createHash('md5');
@@ -7,13 +6,13 @@ export function md5Hash(input) {
   return hash.digest('hex').toUpperCase();
 }
 
-export function ConverclientSign(input) {
-  // 创建一个哈希对象，指定算法为 SHA-1
+export function MiClientSign(nsec: string): string {
   const sha1Hash = crypto.createHash('sha1');
-  // 将服务令牌转换为 utf-8 编码的字节并更新哈希
-  sha1Hash.update(Buffer.from(input, 'utf-8'));
-  // 计算哈希值的摘要并以十六进制字符串表示
-  const digest = sha1Hash.digest();
-  base64.fromByteArray(digest);
-  return digest;
+  // 将 nsec 编码后的字符串添加到哈希对象中
+  sha1Hash.update(nsec, 'utf-8');
+  // 计算哈希值并获取原始二进制数据
+  const sha1Digest = sha1Hash.digest();
+  // 使用 Buffer 对象进行 Base64 编码
+  const clientSign = Buffer.from(sha1Digest).toString('base64');
+  return clientSign;
 }

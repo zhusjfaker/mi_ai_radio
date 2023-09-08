@@ -1,7 +1,6 @@
 import { createRequestBodySync } from '../util/body';
-import { ConverclientSign, md5Hash } from '../util/md5Hash';
+import { MiClientSign, md5Hash } from '../util/md5Hash';
 import { getRandom } from '../util/random';
-import querystring from 'querystring';
 import fetch from 'node-fetch';
 import axios from 'axios';
 
@@ -124,6 +123,15 @@ export class MiAccount {
     });
     const raw = response.data.slice(11);
     const resp = JSON.parse(raw);
+    if (uri === 'serviceLoginAuth2') {
+      const regex = /"nonce":\d+,/;
+      const match = raw.match(regex);
+      if (match) {
+        resp.nonce = match[0].replace('"nonce":', '').replace(',', '');
+      } else {
+        throw new Error(`serviceLoginAuth2 error nonce not found!`);
+      }
+    }
     return resp;
   }
 
@@ -134,11 +142,12 @@ export class MiAccount {
     ssecurity: string
   ): Promise<string> {
     const nsec = `nonce=${nonce}&${ssecurity}`;
-    const clientSign = ConverclientSign(nsec).toString('utf-8');
+    const clientSign = MiClientSign(nsec);
     let url =
       sid !== 'xiaomiio'
-        ? `${location}&clientSign=${querystring.escape(clientSign)}`
+        ? `${location}&clientSign=${encodeURIComponent(clientSign)}`
         : location;
+    console.log(`url: \n ${url}`);
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
@@ -181,7 +190,7 @@ export class MiAccount {
     let serviceToken = this.getToken(sid);
     if (!serviceToken) {
       await this.login(sid);
-      serviceToken = this.getToken(sid);
+      serviceToken = this.getToken(sid)?.[1];
     }
 
     const cookie = new Map<string, string>();
