@@ -75,6 +75,16 @@ export class MiNAService {
     return result;
   }
 
+  public async player_set_volume(deviceId: string, volume: string) {
+    const result = await this.ubus_request(
+      deviceId,
+      'player_set_volume',
+      'mediaplayer',
+      { volume: volume, media: 'app_ios' }
+    );
+    return result;
+  }
+
   public async text_to_speech(deviceId: string, text: string) {
     const result = await this.ubus_request(
       deviceId,
