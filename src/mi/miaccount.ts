@@ -207,8 +207,6 @@ export class MiAccount {
       }
     })();
 
-    const method = data ? 'POST' : 'GET';
-
     const cookieStr = (() => {
       const list = Array.from(cookie.entries());
       let str = '';
@@ -232,8 +230,12 @@ export class MiAccount {
       payload = JSON.stringify(payload);
     } else {
       headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      payload = createRequestBodySync(payload);
+      if (payload != null) {
+        payload = createRequestBodySync(payload);
+      }
     }
+
+    const method = payload ? 'POST' : 'GET';
 
     const res = (await this.fetch(url, {
       method,

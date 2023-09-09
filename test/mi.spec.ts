@@ -49,7 +49,7 @@ describe('MI OPEN API', () => {
     console.log(res);
   }, 60000);
 
-  test.skip('test radio play', async () => {
+  test('test radio play', async () => {
     const deviceId = await ai.device();
     if (deviceId) {
       const res = await ai.player_set_status(deviceId, 'play');
@@ -63,5 +63,10 @@ describe('MI OPEN API', () => {
       const res = await ai.player_set_status(deviceId, 'pause');
       console.log(res);
     }
+  }, 60000);
+
+  test('test get last ask content', async () => {
+    const result = await ai.get_radio_last_ask();
+    console.log(JSON.stringify(result, null, 2));
   }, 60000);
 });

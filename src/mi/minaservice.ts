@@ -114,4 +114,35 @@ export class MiNAService {
     );
     return res;
   }
+
+  public async get_radio_last_ask(): Promise<any[]> {
+    const deviceId = await this.device();
+    const headers = {
+      'User-Agent':
+        'MiHome/6.0.103 (com.xiaomi.mihome; build:6.0.103.1; iOS 14.4.0) Alamofire/6.0.103 MICO/iOSApp/appStore/6.0.103',
+    };
+    if (deviceId) {
+      const hardware = 'LX06';
+      const timestamp = String(Date.now());
+      const url = `https://userprofile.mina.mi.com/device_profile/v2/conversation?source=dialogu&hardware=${hardware}&timestamp=${timestamp}&limit=2`;
+      const data = (token: Map<string, any>, cookie: Map<string, string>) => {
+        cookie.set('deviceId', deviceId);
+        return null;
+      };
+      const result = await this.account.mi_request(
+        'micoapi',
+        url,
+        data,
+        headers
+      );
+      if (result != null) {
+        return (
+          (JSON.parse(result.data ?? '{}').records as any[])?.map(
+            (x) => x.query
+          ) ?? []
+        );
+      }
+    }
+    return undefined;
+  }
 }
