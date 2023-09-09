@@ -200,10 +200,11 @@ export class MiAccount {
     let payload = await (async () => {
       if (typeof data === 'function') {
         return await data(this.token, cookie);
-      } else if (data) {
+      } else if ((data as any) instanceof Map) {
         return Object.fromEntries(data);
+      } else {
+        return data;
       }
-      return null;
     })();
 
     const method = data ? 'POST' : 'GET';
@@ -229,6 +230,9 @@ export class MiAccount {
       payload = createRequestBodySync(payload);
     } else if (headers['Content-Type'] === 'application/json' && payload) {
       payload = JSON.stringify(payload);
+    } else {
+      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      payload = createRequestBodySync(payload);
     }
 
     const res = (await this.fetch(url, {

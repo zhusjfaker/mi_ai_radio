@@ -48,6 +48,17 @@ export class MiNAService {
     return result?.data;
   }
 
+  public async device(): Promise<string | undefined> {
+    const devices = await this.device_list();
+    const deviceId = process.env.MI_DID;
+    if (deviceId) {
+      const id = devices?.find((d: any) => d.miotDID === deviceId)?.deviceID;
+      return id;
+    } else {
+      throw new Error('env MI_DID is undefined');
+    }
+  }
+
   public async ubus_request(
     deviceId: string,
     method: string,

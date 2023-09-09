@@ -4,6 +4,13 @@ import { MiClientSign } from '../src/util/md5Hash';
 import { getRandom } from '../src/util/random';
 
 describe('MI OPEN API', () => {
+  const account: MiAccount = new MiAccount();
+  const ai = new MiNAService(account);
+
+  beforeEach(async () => {
+    await account.login('xiaomiio');
+  });
+
   test('get getRandom length', () => {
     const res = getRandom(16);
     expect(res.length).toBe(16);
@@ -24,17 +31,37 @@ describe('MI OPEN API', () => {
   });
 
   test('test login api', async () => {
-    const account = new MiAccount();
-    await account.login('xiaomiio');
     expect(account.token !== undefined).toBe(true);
     expect(account.token.get('xiaomiio') !== undefined).toBe(true);
     console.log(account.token.get('xiaomiio'));
   }, 60000);
 
   test('test get device list', async () => {
-    const account = new MiAccount();
-    const ai = new MiNAService(account);
     const res = await ai.device_list();
     expect(res.length > 0).toBe(true);
+  }, 60000);
+
+  test('test text_to_speech', async () => {
+    const account = new MiAccount();
+    const ai = new MiNAService(account);
+    const deviceId = process.env.MI_DID;
+    const res = await ai.text_to_speech(deviceId, '你好 我是小朱同学');
+    console.log(res);
+  }, 60000);
+
+  test.skip('test radio play', async () => {
+    const deviceId = await ai.device();
+    if (deviceId) {
+      const res = await ai.player_set_status(deviceId, 'play');
+      console.log(res);
+    }
+  }, 60000);
+
+  test('test radio pause', async () => {
+    const deviceId = await ai.device();
+    if (deviceId) {
+      const res = await ai.player_set_status(deviceId, 'pause');
+      console.log(res);
+    }
   }, 60000);
 });
