@@ -7,9 +7,9 @@ export async function ApiController(ctx: Context) {
   const msg = req.body.content;
   const id = req.body.id != '' ? req.body.id : undefined;
   try {
-    // const reponse = await request_gpt(msg, id);
+    const reponse = await request_gpt(msg, id);
     ctx.body = {
-      // id: reponse.id,
+      id: reponse.id,
       msg,
     };
   } catch (error) {
@@ -18,4 +18,3 @@ export async function ApiController(ctx: Context) {
     };
   }
 }
-
