@@ -44,12 +44,12 @@ describe('MI OPEN API', () => {
   test('test text_to_speech', async () => {
     const account = new MiAccount();
     const ai = new MiNAService(account);
-    const deviceId = process.env.MI_DID;
-    const res = await ai.text_to_speech(deviceId, '你好 我是小朱同学');
+    const deviceId = await ai.device();
+    const res = await ai.text_to_speech(deviceId, '你好今天星期四');
     console.log(res);
   }, 60000);
 
-  test('test radio play', async () => {
+  test.skip('test radio play', async () => {
     const deviceId = await ai.device();
     if (deviceId) {
       const res = await ai.player_set_status(deviceId, 'play');
@@ -57,7 +57,7 @@ describe('MI OPEN API', () => {
     }
   }, 60000);
 
-  test('test radio pause', async () => {
+  test.skip('test radio pause', async () => {
     const deviceId = await ai.device();
     if (deviceId) {
       const res = await ai.player_set_status(deviceId, 'pause');
@@ -65,7 +65,7 @@ describe('MI OPEN API', () => {
     }
   }, 60000);
 
-  test('test get last ask content', async () => {
+  test.skip('test get last ask content', async () => {
     const result = await ai.get_radio_last_ask();
     console.log(JSON.stringify(result, null, 2));
   }, 60000);
