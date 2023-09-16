@@ -9,11 +9,6 @@ export class MiAccount {
   public password: string;
   public token: Map<string, any>;
   public fetch = fetch;
-  public proxy = false as const;
-  // public proxy = {
-  //   host: '192.168.5.1',
-  //   port: 13128,
-  // };
 
   constructor() {
     if (!process.env['MI_USER']) {
@@ -121,7 +116,6 @@ export class MiAccount {
       data: data ? createRequestBodySync(data) : null,
       headers,
       httpsAgent: false,
-      proxy: this.proxy,
     }).catch((err) => {
       throw new Error(
         `uri: \n ${uri} \n data: \n ${data} \n Error: \n ${err.message} \n Stack: \n ${err.stack}`
@@ -163,7 +157,6 @@ export class MiAccount {
         Connection: 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      proxy: this.proxy,
     });
     const serviceToken = (() => {
       if (response.headers['set-cookie']?.length > 0) {
