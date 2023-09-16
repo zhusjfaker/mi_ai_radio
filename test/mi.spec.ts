@@ -7,7 +7,7 @@ describe('MI OPEN API', () => {
   const account: MiAccount = new MiAccount();
   const ai = new MiNAService(account);
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await account.login('xiaomiio');
   });
 
@@ -49,7 +49,7 @@ describe('MI OPEN API', () => {
     console.log(res);
   }, 60000);
 
-  test.skip('test radio play', async () => {
+  test('test radio play', async () => {
     const deviceId = await ai.device();
     if (deviceId) {
       const res = await ai.player_set_status(deviceId, 'play');
@@ -57,7 +57,7 @@ describe('MI OPEN API', () => {
     }
   }, 60000);
 
-  test.skip('test radio pause', async () => {
+  test('test radio pause', async () => {
     const deviceId = await ai.device();
     if (deviceId) {
       const res = await ai.player_set_status(deviceId, 'pause');
@@ -65,7 +65,7 @@ describe('MI OPEN API', () => {
     }
   }, 60000);
 
-  test.skip('test get last ask content', async () => {
+  test('test get last ask content', async () => {
     const result = await ai.get_radio_last_ask();
     console.log(JSON.stringify(result, null, 2));
   }, 60000);
