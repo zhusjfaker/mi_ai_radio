@@ -117,7 +117,7 @@ export class MiAccount {
       url,
       data: data ? createRequestBodySync(data) : null,
       headers,
-      httpsAgent: false,
+      httpsAgent: this.proxy ? proxyAgent() : false,
     }).catch((err) => {
       throw new Error(
         `uri: \n ${uri} \n data: \n ${data} \n Error: \n ${err.message} \n Stack: \n ${err.stack}`
@@ -159,6 +159,7 @@ export class MiAccount {
         Connection: 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+      httpsAgent: this.proxy ? proxyAgent() : false,
     });
     const serviceToken = (() => {
       if (response.headers['set-cookie']?.length > 0) {
