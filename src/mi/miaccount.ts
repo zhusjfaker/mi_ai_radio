@@ -3,12 +3,14 @@ import { MiClientSign, md5Hash } from '../util/md5Hash';
 import { getRandom } from '../util/random';
 import fetch from 'node-fetch';
 import axios from 'axios';
+import { proxyAgent } from '../util/proxy';
 
 export class MiAccount {
   public username: string;
   public password: string;
   public token: Map<string, any>;
   public fetch = fetch;
+  public proxy = true;
 
   constructor() {
     if (!process.env['MI_USER']) {
@@ -241,6 +243,7 @@ export class MiAccount {
       method,
       headers,
       body: data ? payload : null,
+      agent: this.proxy ? proxyAgent() : undefined,
     }).catch((err) => {
       throw new Error(
         `sid: ${sid}; \n url: ${url}; \n function: ${'mi_request'}; \n Error: \n ${
