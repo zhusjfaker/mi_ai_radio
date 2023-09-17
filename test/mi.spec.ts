@@ -7,28 +7,28 @@ describe('MI OPEN API', () => {
   const account: MiAccount = new MiAccount();
   const ai = new MiNAService(account);
 
+  test('get getRandom length', () => {
+    const res = getRandom(16);
+    expect(res.length).toBe(16);
+  });
+
+  test('test get sign', () => {
+    const nonce = '249494511177612288';
+    const ssecurity = '7CeUyF3glpd8nrF/SgXFFQ==';
+    const nsec = `nonce=${nonce}&${ssecurity}`;
+    expect(nsec === 'nonce=249494511177612288&7CeUyF3glpd8nrF/SgXFFQ==').toBe(
+      true
+    );
+    const clientSign = 'jN3AcB7NvzW6uwW7HOuYO6Gcg9k=';
+    const python_uri_encode = 'jN3AcB7NvzW6uwW7HOuYO6Gcg9k%3D';
+    const result = MiClientSign(nsec);
+    expect(result === clientSign).toBe(true);
+    expect(encodeURIComponent(result) === python_uri_encode).toBe(true);
+  });
+
   if (process.env['OUT_HOME'] !== 'true') {
     beforeAll(async () => {
       await account.login('xiaomiio');
-    });
-
-    test('get getRandom length', () => {
-      const res = getRandom(16);
-      expect(res.length).toBe(16);
-    });
-
-    test('test get sign', () => {
-      const nonce = '249494511177612288';
-      const ssecurity = '7CeUyF3glpd8nrF/SgXFFQ==';
-      const nsec = `nonce=${nonce}&${ssecurity}`;
-      expect(nsec === 'nonce=249494511177612288&7CeUyF3glpd8nrF/SgXFFQ==').toBe(
-        true
-      );
-      const clientSign = 'jN3AcB7NvzW6uwW7HOuYO6Gcg9k=';
-      const python_uri_encode = 'jN3AcB7NvzW6uwW7HOuYO6Gcg9k%3D';
-      const result = MiClientSign(nsec);
-      expect(result === clientSign).toBe(true);
-      expect(encodeURIComponent(result) === python_uri_encode).toBe(true);
     });
 
     test('test login api', async () => {
