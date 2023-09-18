@@ -27,28 +27,37 @@ describe('MI OPEN API', () => {
   });
 
   if (process.env['OUT_HOME'] !== 'true') {
-    beforeAll(async () => {
-      await account.login('xiaomiio');
-    });
+    test.concurrent(
+      'test login api',
+      async () => {
+        await account.login('xiaomiio');
+        expect(account.token !== undefined).toBe(true);
+        expect(account.token.get('xiaomiio') !== undefined).toBe(true);
+        console.log(account.token.get('xiaomiio'));
+      },
+      60000
+    );
 
-    test('test login api', async () => {
-      expect(account.token !== undefined).toBe(true);
-      expect(account.token.get('xiaomiio') !== undefined).toBe(true);
-      console.log(account.token.get('xiaomiio'));
-    }, 60000);
+    test.concurrent(
+      'test get device list',
+      async () => {
+        const res = await ai.device_list();
+        expect(res.length > 0).toBe(true);
+      },
+      60000
+    );
 
-    test('test get device list', async () => {
-      const res = await ai.device_list();
-      expect(res.length > 0).toBe(true);
-    }, 60000);
-
-    test('test text_to_speech', async () => {
-      const account = new MiAccount();
-      const ai = new MiNAService(account);
-      const deviceId = await ai.device();
-      const res = await ai.text_to_speech(deviceId, '你好今天星期四');
-      console.log(res);
-    }, 60000);
+    test.concurrent(
+      'test text_to_speech',
+      async () => {
+        const account = new MiAccount();
+        const ai = new MiNAService(account);
+        const deviceId = await ai.device();
+        const res = await ai.text_to_speech(deviceId, '你好今天星期四');
+        console.log(res);
+      },
+      60000
+    );
 
     test.skip('test radio play', async () => {
       const deviceId = await ai.device();
@@ -58,13 +67,17 @@ describe('MI OPEN API', () => {
       }
     }, 60000);
 
-    test('test radio pause', async () => {
-      const deviceId = await ai.device();
-      if (deviceId) {
-        const res = await ai.player_set_status(deviceId, 'pause');
-        console.log(res);
-      }
-    }, 60000);
+    test.concurrent(
+      'test radio pause',
+      async () => {
+        const deviceId = await ai.device();
+        if (deviceId) {
+          const res = await ai.player_set_status(deviceId, 'pause');
+          console.log(res);
+        }
+      },
+      60000
+    );
 
     test.skip('test get last ask content', async () => {
       const result = await ai.get_radio_last_ask();
