@@ -20,7 +20,7 @@ export class MiIOService {
       cookies: Map<string, string>
     ) => {
       cookies.set('PassportDeviceId', token.get('deviceId'));
-      return {} as any;
+      return MiIOService.signData(uri, data, token.get('xiaomiio')?.[0]) as any;
     };
 
     const headers = {
@@ -35,6 +35,30 @@ export class MiIOService {
       prepare_data,
       headers
     );
+
+    if (result?.result) {
+      return result.result;
+    } else {
+      throw new Error(
+        `miio_request uri: ${uri} error: \n ${JSON.stringify(result, null, 2)}`
+      );
+    }
+  }
+
+  public async home_request(did: string, method: string, params: any) {
+    const res = await this.miio_request('/home/rpc/' + did, {
+      id: 1,
+      method: method,
+      accessKey: 'IOS00026747c5acafc2',
+      params: params,
+    });
+
+    return res;
+  }
+
+  public async miot_request(cmd: string, params: any) {
+    const res = await this.miio_request('/miotspec/' + cmd, { params: params });
+    return res;
   }
 
   public static signNonce(ssecurity: string, nonce: string) {
