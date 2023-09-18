@@ -10,7 +10,7 @@ export class MiAccount {
   public password: string;
   public token: Map<string, any>;
   public fetch = fetch;
-  public proxy = true;
+  public proxy = process.env['MI_API_PROXY'] === 'true';
 
   constructor() {
     if (!process.env['MI_USER']) {
