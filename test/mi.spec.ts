@@ -81,6 +81,7 @@ describe('MI OPEN API', () => {
 
     test.skip('test get last ask content', async () => {
       const result = await ai.get_radio_last_ask();
+      expect(result !== undefined).toBe(true);
       console.log(JSON.stringify(result, null, 2));
     }, 60000);
   }
