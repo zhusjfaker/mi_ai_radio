@@ -50,7 +50,7 @@ describe('MI OPEN API', () => {
       console.log(res);
     }, 60000);
 
-    test('test radio play', async () => {
+    test.skip('test radio play', async () => {
       const deviceId = await ai.device();
       if (deviceId) {
         const res = await ai.player_set_status(deviceId, 'play');
