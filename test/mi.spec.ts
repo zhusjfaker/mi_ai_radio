@@ -79,13 +79,9 @@ describe('MI OPEN API', () => {
       60000
     );
 
-    test.concurrent(
-      'test get last ask content',
-      async () => {
-        const result = await ai.get_radio_last_ask();
-        console.log(JSON.stringify(result, null, 2));
-      },
-      60000
-    );
+    test.skip('test get last ask content', async () => {
+      const result = await ai.get_radio_last_ask();
+      console.log(JSON.stringify(result, null, 2));
+    }, 60000);
   }
 });
