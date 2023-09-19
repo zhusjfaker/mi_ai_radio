@@ -33,7 +33,7 @@ describe('MI OPEN API', () => {
         await account.login('xiaomiio');
         expect(account.token !== undefined).toBe(true);
         expect(account.token.get('xiaomiio') !== undefined).toBe(true);
-        console.log(account.token.get('xiaomiio'));
+        // console.log(account.token.get('xiaomiio'));
       },
       60000
     );
@@ -53,8 +53,8 @@ describe('MI OPEN API', () => {
         const account = new MiAccount();
         const ai = new MiNAService(account);
         const deviceId = await ai.device();
-        const res = await ai.text_to_speech(deviceId, '你好今天星期四');
-        console.log(res);
+        const res = await ai.text_to_speech(deviceId, '今天星期四');
+        // console.log(res);
       },
       60000
     );
@@ -73,7 +73,7 @@ describe('MI OPEN API', () => {
         const deviceId = await ai.device();
         if (deviceId) {
           const res = await ai.player_set_status(deviceId, 'pause');
-          console.log(res);
+          // console.log(res);
         }
       },
       60000

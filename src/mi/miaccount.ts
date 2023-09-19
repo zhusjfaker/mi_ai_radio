@@ -149,7 +149,7 @@ export class MiAccount {
       sid !== 'xiaomiio'
         ? `${location}&clientSign=${encodeURIComponent(clientSign)}`
         : location;
-    console.log(`url: \n ${url}`);
+    // console.log(`url: \n ${url}`);
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
